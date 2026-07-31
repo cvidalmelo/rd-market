@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { titulo } from "@/components/ui";
 import { obtenerUsuario } from "@/lib/usuarios";
 import FormularioUsuario from "../../FormularioUsuario";
 import { actualizarUsuarioAction } from "../../actions";
@@ -15,7 +16,7 @@ export default async function EditarUsuarioPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold">Editar usuario</h1>
+      <h1 className={`mb-6 ${titulo}`}>Editar usuario</h1>
       <FormularioUsuario
         action={actualizarUsuarioAction}
         usuario={usuario}

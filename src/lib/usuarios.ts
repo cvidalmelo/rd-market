@@ -25,6 +25,10 @@ export function listarUsuarios() {
   return prisma.usuario.findMany({ orderBy: { creadoEn: "desc" } });
 }
 
+export function contarUsuarios() {
+  return prisma.usuario.count();
+}
+
 export function obtenerUsuario(id: string) {
   return prisma.usuario.findUnique({ where: { id } });
 }

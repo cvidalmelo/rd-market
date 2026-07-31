@@ -1,4 +1,16 @@
 import Link from "next/link";
+import {
+  botonPeligro,
+  botonPrimario,
+  celda,
+  contenedorTabla,
+  encabezadoTabla,
+  enlaceAccion,
+  fila,
+  tabla,
+  textoVacio,
+  titulo,
+} from "@/components/ui";
 import { listarUsuarios } from "@/lib/usuarios";
 import { eliminarUsuarioAction } from "./actions";
 
@@ -11,45 +23,42 @@ export default async function UsuariosPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Usuarios</h1>
-        <Link
-          href="/usuarios/nuevo"
-          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-        >
+        <h1 className={titulo}>Usuarios</h1>
+        <Link href="/usuarios/nuevo" className={botonPrimario}>
           Nuevo usuario
         </Link>
       </div>
 
       {usuarios.length === 0 ? (
-        <p className="text-sm text-slate-600">Todavia no hay usuarios registrados.</p>
+        <p className={textoVacio}>Todavia no hay usuarios registrados.</p>
       ) : (
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-100 text-xs uppercase text-slate-600">
+        <div className={contenedorTabla}>
+          <table className={tabla}>
+            <thead className={encabezadoTabla}>
               <tr>
-                <th className="px-4 py-3">Nombre</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Registrado</th>
-                <th className="px-4 py-3 text-right">Acciones</th>
+                <th className={celda}>Nombre</th>
+                <th className={celda}>Email</th>
+                <th className={celda}>Registrado</th>
+                <th className={`${celda} text-right`}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {usuarios.map((usuario) => (
-                <tr key={usuario.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-3 font-medium">{usuario.nombre}</td>
-                  <td className="px-4 py-3">{usuario.email}</td>
-                  <td className="px-4 py-3">{formatoFecha.format(usuario.creadoEn)}</td>
-                  <td className="px-4 py-3">
+                <tr key={usuario.id} className={fila}>
+                  <td className={`${celda} font-medium`}>{usuario.nombre}</td>
+                  <td className={celda}>{usuario.email}</td>
+                  <td className={celda}>{formatoFecha.format(usuario.creadoEn)}</td>
+                  <td className={celda}>
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         href={`/usuarios/${usuario.id}/editar`}
-                        className="text-slate-700 hover:underline"
+                        className={enlaceAccion}
                       >
                         Editar
                       </Link>
                       <form action={eliminarUsuarioAction}>
                         <input type="hidden" name="id" value={usuario.id} />
-                        <button type="submit" className="text-red-600 hover:underline">
+                        <button type="submit" className={botonPeligro}>
                           Eliminar
                         </button>
                       </form>

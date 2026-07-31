@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import NavBar from "@/components/NavBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +16,20 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
+        <header className="border-b border-slate-200 bg-white">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-4">
+            <Link href="/" className="text-lg font-semibold">
+              MiniMarket
+            </Link>
+            <NavBar />
+          </div>
+        </header>
+
         <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
+
+        <footer className="mx-auto max-w-5xl px-6 pb-10 text-xs text-slate-500">
+          Proyecto universitario - Next.js, Prisma y SQLite
+        </footer>
       </body>
     </html>
   );

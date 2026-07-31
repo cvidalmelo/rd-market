@@ -29,6 +29,10 @@ export function listarCompras() {
   });
 }
 
+export function contarCompras() {
+  return prisma.compra.count();
+}
+
 /**
  * Registra la compra y descuenta el stock del producto en una sola transaccion,
  * para que nunca quede una compra sin su descuento correspondiente.
