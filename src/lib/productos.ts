@@ -29,6 +29,10 @@ export function listarProductos() {
   return prisma.producto.findMany({ orderBy: { creadoEn: "desc" } });
 }
 
+export function contarProductos() {
+  return prisma.producto.count();
+}
+
 export function obtenerProducto(id: string) {
   return prisma.producto.findUnique({ where: { id } });
 }
