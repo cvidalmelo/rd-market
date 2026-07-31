@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { titulo } from "@/components/ui";
 import { obtenerProducto } from "@/lib/productos";
 import FormularioProducto from "../../FormularioProducto";
 import { actualizarProductoAction } from "../../actions";
@@ -15,7 +16,7 @@ export default async function EditarProductoPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold">Editar producto</h1>
+      <h1 className={`mb-6 ${titulo}`}>Editar producto</h1>
       <FormularioProducto
         action={actualizarProductoAction}
         producto={producto}

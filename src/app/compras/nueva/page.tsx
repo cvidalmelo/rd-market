@@ -1,4 +1,12 @@
 import Link from "next/link";
+import {
+  botonPrimario,
+  campo,
+  enlaceSecundario,
+  etiqueta,
+  textoVacio,
+  titulo,
+} from "@/components/ui";
 import { listarProductos } from "@/lib/productos";
 import { listarUsuarios } from "@/lib/usuarios";
 import { crearCompraAction } from "../actions";
@@ -7,10 +15,6 @@ export const dynamic = "force-dynamic";
 
 type Props = { searchParams: Promise<{ error?: string }> };
 
-const campo =
-  "mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none";
-const etiqueta = "block text-sm font-medium text-slate-700";
-
 export default async function NuevaCompraPage({ searchParams }: Props) {
   const { error } = await searchParams;
   const [usuarios, productos] = await Promise.all([listarUsuarios(), listarProductos()]);
@@ -18,7 +22,7 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-xl font-semibold">Nueva compra</h1>
+      <h1 className={`mb-6 ${titulo}`}>Nueva compra</h1>
 
       {error ? (
         <p className="mb-4 max-w-lg rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -27,7 +31,7 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
       ) : null}
 
       {usuarios.length === 0 || disponibles.length === 0 ? (
-        <p className="text-sm text-slate-600">
+        <p className={textoVacio}>
           Para registrar una compra necesitas al menos un usuario y un producto con stock
           disponible.
         </p>
@@ -75,13 +79,10 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              type="submit"
-              className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-            >
+            <button type="submit" className={botonPrimario}>
               Registrar compra
             </button>
-            <Link href="/compras" className="text-sm text-slate-600 hover:underline">
+            <Link href="/compras" className={enlaceSecundario}>
               Cancelar
             </Link>
           </div>

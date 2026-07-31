@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { botonPrimario, campo, enlaceSecundario, etiqueta } from "@/components/ui";
 import type { Producto } from "@/lib/productos";
 
 type Props = {
@@ -6,10 +7,6 @@ type Props = {
   producto?: Producto;
   textoBoton: string;
 };
-
-const campo =
-  "mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none";
-const etiqueta = "block text-sm font-medium text-slate-700";
 
 export default function FormularioProducto({ action, producto, textoBoton }: Props) {
   return (
@@ -87,13 +84,10 @@ export default function FormularioProducto({ action, producto, textoBoton }: Pro
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-        >
+        <button type="submit" className={botonPrimario}>
           {textoBoton}
         </button>
-        <Link href="/productos" className="text-sm text-slate-600 hover:underline">
+        <Link href="/productos" className={enlaceSecundario}>
           Cancelar
         </Link>
       </div>

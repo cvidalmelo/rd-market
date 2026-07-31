@@ -1,4 +1,15 @@
 import Link from "next/link";
+import {
+  botonPeligro,
+  botonPrimario,
+  celda,
+  contenedorTabla,
+  encabezadoTabla,
+  fila,
+  tabla,
+  textoVacio,
+  titulo,
+} from "@/components/ui";
 import { listarCompras } from "@/lib/compras";
 import { eliminarCompraAction } from "./actions";
 
@@ -14,48 +25,45 @@ export default async function ComprasPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Compras</h1>
-        <Link
-          href="/compras/nueva"
-          className="rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-        >
+        <h1 className={titulo}>Compras</h1>
+        <Link href="/compras/nueva" className={botonPrimario}>
           Nueva compra
         </Link>
       </div>
 
       {compras.length === 0 ? (
-        <p className="text-sm text-slate-600">Todavia no se registraron compras.</p>
+        <p className={textoVacio}>Todavia no se registraron compras.</p>
       ) : (
-        <div className="overflow-x-auto rounded border border-slate-200 bg-white">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-100 text-xs uppercase text-slate-600">
+        <div className={contenedorTabla}>
+          <table className={tabla}>
+            <thead className={encabezadoTabla}>
               <tr>
-                <th className="px-4 py-3">Usuario</th>
-                <th className="px-4 py-3">Producto</th>
-                <th className="px-4 py-3">Cantidad</th>
-                <th className="px-4 py-3">Total</th>
-                <th className="px-4 py-3">Fecha</th>
-                <th className="px-4 py-3 text-right">Acciones</th>
+                <th className={celda}>Usuario</th>
+                <th className={celda}>Producto</th>
+                <th className={celda}>Cantidad</th>
+                <th className={celda}>Total</th>
+                <th className={celda}>Fecha</th>
+                <th className={`${celda} text-right`}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {compras.map((compra) => (
-                <tr key={compra.id} className="border-b border-slate-100 last:border-0">
-                  <td className="px-4 py-3">
+                <tr key={compra.id} className={fila}>
+                  <td className={celda}>
                     <span className="font-medium">{compra.usuario.nombre}</span>
                     <p className="text-xs text-slate-500">{compra.usuario.email}</p>
                   </td>
-                  <td className="px-4 py-3">{compra.producto.nombre}</td>
-                  <td className="px-4 py-3">{compra.cantidad}</td>
-                  <td className="px-4 py-3">
+                  <td className={celda}>{compra.producto.nombre}</td>
+                  <td className={celda}>{compra.cantidad}</td>
+                  <td className={celda}>
                     ${(compra.producto.precio * compra.cantidad).toFixed(2)}
                   </td>
-                  <td className="px-4 py-3">{formatoFecha.format(compra.fecha)}</td>
-                  <td className="px-4 py-3">
+                  <td className={celda}>{formatoFecha.format(compra.fecha)}</td>
+                  <td className={celda}>
                     <div className="flex justify-end">
                       <form action={eliminarCompraAction}>
                         <input type="hidden" name="id" value={compra.id} />
-                        <button type="submit" className="text-red-600 hover:underline">
+                        <button type="submit" className={botonPeligro}>
                           Anular
                         </button>
                       </form>
