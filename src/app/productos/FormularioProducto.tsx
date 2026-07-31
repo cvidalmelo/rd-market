@@ -21,6 +21,7 @@ export default function FormularioProducto({ action, producto, textoBoton }: Pro
           id="nombre"
           name="nombre"
           type="text"
+          required
           defaultValue={producto?.nombre ?? ""}
           className={campo}
         />
@@ -50,6 +51,7 @@ export default function FormularioProducto({ action, producto, textoBoton }: Pro
             type="number"
             step="0.01"
             min="0"
+            required
             defaultValue={producto?.precio ?? ""}
             className={campo}
           />
@@ -64,6 +66,7 @@ export default function FormularioProducto({ action, producto, textoBoton }: Pro
             name="stock"
             type="number"
             min="0"
+            required
             defaultValue={producto?.stock ?? ""}
             className={campo}
           />

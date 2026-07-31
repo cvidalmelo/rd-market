@@ -1,4 +1,5 @@
 import Link from "next/link";
+import MensajeError from "@/components/MensajeError";
 import {
   botonPrimario,
   campo,
@@ -24,11 +25,7 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
     <div>
       <h1 className={`mb-6 ${titulo}`}>Nueva compra</h1>
 
-      {error ? (
-        <p className="mb-4 max-w-lg rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
+      <MensajeError mensaje={error} />
 
       {usuarios.length === 0 || disponibles.length === 0 ? (
         <p className={textoVacio}>
@@ -73,6 +70,7 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
               name="cantidad"
               type="number"
               min="1"
+              required
               defaultValue={1}
               className={campo}
             />
