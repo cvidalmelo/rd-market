@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div>
@@ -9,6 +11,12 @@ export default function Home() {
         Aplicacion CRUD de productos, usuarios y compras construida con Next.js, Prisma y
         SQLite.
       </p>
+      <Link
+        href="/productos"
+        className="mt-6 inline-block rounded bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+      >
+        Ver productos
+      </Link>
     </div>
   );
 }
