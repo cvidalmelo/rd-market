@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { conManejoDeError } from "@/lib/formularios";
 import {
   actualizarProducto,
   crearProducto,
@@ -11,7 +12,7 @@ import {
 
 export async function crearProductoAction(formData: FormData) {
   const datos = normalizarProducto(Object.fromEntries(formData));
-  await crearProducto(datos);
+  await conManejoDeError("/productos/nuevo", () => crearProducto(datos));
 
   revalidatePath("/productos");
   redirect("/productos");
@@ -20,7 +21,7 @@ export async function crearProductoAction(formData: FormData) {
 export async function actualizarProductoAction(formData: FormData) {
   const id = String(formData.get("id"));
   const datos = normalizarProducto(Object.fromEntries(formData));
-  await actualizarProducto(id, datos);
+  await conManejoDeError(`/productos/${id}/editar`, () => actualizarProducto(id, datos));
 
   revalidatePath("/productos");
   redirect("/productos");
