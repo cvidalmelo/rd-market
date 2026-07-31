@@ -13,6 +13,7 @@ model Usuario {
   email    String   @unique
   password String
   creadoEn DateTime @default(now())
+  compras  Compra[]
 }
 
 model Producto {
@@ -23,4 +24,15 @@ model Producto {
   stock       Int
   categoria   String?
   creadoEn    DateTime @default(now())
+  compras     Compra[]
+}
+
+model Compra {
+  id         String   @id @default(cuid())
+  usuarioId  String
+  productoId String
+  cantidad   Int
+  fecha      DateTime @default(now())
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
 }
