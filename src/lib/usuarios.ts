@@ -1,4 +1,7 @@
 import prisma from "./prisma";
+import { ErrorDeValidacion } from "./errores";
+
+const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export type DatosUsuario = {
   nombre: string;
@@ -21,6 +24,30 @@ export function normalizarUsuario(entrada: Record<string, unknown>): DatosUsuari
   };
 }
 
+/**
+ * Reglas de negocio comunes a la creacion y a la edicion de un usuario.
+ * `idActual` evita que un usuario choque consigo mismo al editarse.
+ */
+export async function validarUsuario(datos: DatosUsuario, idActual?: string) {
+  if (!datos.nombre) {
+    throw new ErrorDeValidacion("El nombre del usuario es obligatorio.");
+  }
+
+  if (!FORMATO_EMAIL.test(datos.email)) {
+    throw new ErrorDeValidacion("El email no tiene un formato valido.");
+  }
+
+  if (datos.password.length < 4) {
+    throw new ErrorDeValidacion("La contrasena debe tener al menos 4 caracteres.");
+  }
+
+  const existente = await prisma.usuario.findUnique({ where: { email: datos.email } });
+
+  if (existente && existente.id !== idActual) {
+    throw new ErrorDeValidacion("Ya existe un usuario registrado con ese email.");
+  }
+}
+
 export function listarUsuarios() {
   return prisma.usuario.findMany({ orderBy: { creadoEn: "desc" } });
 }
@@ -33,11 +60,13 @@ export function obtenerUsuario(id: string) {
   return prisma.usuario.findUnique({ where: { id } });
 }
 
-export function crearUsuario(datos: DatosUsuario) {
+export async function crearUsuario(datos: DatosUsuario) {
+  await validarUsuario(datos);
   return prisma.usuario.create({ data: datos });
 }
 
-export function actualizarUsuario(id: string, datos: DatosUsuario) {
+export async function actualizarUsuario(id: string, datos: DatosUsuario) {
+  await validarUsuario(datos, id);
   return prisma.usuario.update({ where: { id }, data: datos });
 }
 

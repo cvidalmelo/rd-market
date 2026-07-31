@@ -38,6 +38,14 @@ export function contarCompras() {
  * para que nunca quede una compra sin su descuento correspondiente.
  */
 export async function crearCompra(datos: DatosCompra) {
+  if (!datos.usuarioId || !datos.productoId) {
+    throw new ErrorDeValidacion("Debes seleccionar un usuario y un producto.");
+  }
+
+  if (!Number.isInteger(datos.cantidad) || datos.cantidad < 1) {
+    throw new ErrorDeValidacion("La cantidad debe ser un numero entero mayor que cero.");
+  }
+
   return prisma.$transaction(async (tx) => {
     const producto = await tx.producto.findUnique({ where: { id: datos.productoId } });
 
