@@ -21,6 +21,7 @@ export default function FormularioUsuario({ action, usuario, textoBoton }: Props
           id="nombre"
           name="nombre"
           type="text"
+          required
           defaultValue={usuario?.nombre ?? ""}
           className={campo}
         />
@@ -34,6 +35,7 @@ export default function FormularioUsuario({ action, usuario, textoBoton }: Props
           id="email"
           name="email"
           type="email"
+          required
           defaultValue={usuario?.email ?? ""}
           className={campo}
         />
@@ -47,6 +49,7 @@ export default function FormularioUsuario({ action, usuario, textoBoton }: Props
           id="password"
           name="password"
           type="text"
+          required
           defaultValue={usuario?.password ?? ""}
           className={campo}
         />

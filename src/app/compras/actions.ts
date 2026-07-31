@@ -3,19 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { crearCompra, eliminarCompra, normalizarCompra } from "@/lib/compras";
-import { ErrorDeValidacion } from "@/lib/errores";
+import { conManejoDeError } from "@/lib/formularios";
 
 export async function crearCompraAction(formData: FormData) {
   const datos = normalizarCompra(Object.fromEntries(formData));
-
-  try {
-    await crearCompra(datos);
-  } catch (error) {
-    if (error instanceof ErrorDeValidacion) {
-      redirect(`/compras/nueva?error=${encodeURIComponent(error.message)}`);
-    }
-    throw error;
-  }
+  await conManejoDeError("/compras/nueva", () => crearCompra(datos));
 
   revalidatePath("/compras");
   revalidatePath("/productos");

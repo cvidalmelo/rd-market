@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ErrorDeValidacion } from "@/lib/errores";
 import { crearProducto, listarProductos, normalizarProducto } from "@/lib/productos";
 
 export async function GET() {
@@ -8,6 +9,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const cuerpo = (await request.json()) as Record<string, unknown>;
-  const producto = await crearProducto(normalizarProducto(cuerpo));
-  return NextResponse.json(producto, { status: 201 });
+
+  try {
+    const producto = await crearProducto(normalizarProducto(cuerpo));
+    return NextResponse.json(producto, { status: 201 });
+  } catch (error) {
+    if (error instanceof ErrorDeValidacion) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    throw error;
+  }
 }

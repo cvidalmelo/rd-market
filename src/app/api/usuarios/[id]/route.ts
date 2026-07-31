@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ErrorDeValidacion } from "@/lib/errores";
 import {
   actualizarUsuario,
   eliminarUsuario,
@@ -22,8 +23,16 @@ export async function GET(request: Request, { params }: Contexto) {
 export async function PUT(request: Request, { params }: Contexto) {
   const { id } = await params;
   const cuerpo = (await request.json()) as Record<string, unknown>;
-  const usuario = await actualizarUsuario(id, normalizarUsuario(cuerpo));
-  return NextResponse.json(usuario);
+
+  try {
+    const usuario = await actualizarUsuario(id, normalizarUsuario(cuerpo));
+    return NextResponse.json(usuario);
+  } catch (error) {
+    if (error instanceof ErrorDeValidacion) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    throw error;
+  }
 }
 
 export async function DELETE(request: Request, { params }: Contexto) {
