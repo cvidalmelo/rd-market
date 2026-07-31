@@ -6,3 +6,13 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+model Producto {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String?
+  precio      Float
+  stock       Int
+  categoria   String?
+  creadoEn    DateTime @default(now())
+}
