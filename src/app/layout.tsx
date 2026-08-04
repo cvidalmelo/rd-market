@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import NavBar from "@/components/NavBar";
+import { obtenerUsuarioActual } from "@/lib/dal";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,11 +9,13 @@ export const metadata: Metadata = {
   description: "CRUD de productos, usuarios y compras",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const usuario = await obtenerUsuarioActual();
+
   return (
     <html lang="es">
       <body>
@@ -21,7 +24,7 @@ export default function RootLayout({
             <Link href="/" className="text-lg font-semibold">
               MiniMarket
             </Link>
-            <NavBar />
+            <NavBar usuario={usuario} />
           </div>
         </header>
 

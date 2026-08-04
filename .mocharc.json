@@ -1,0 +1,18 @@
+{
+  "spec": "tests-selenium/**/*.spec.js",
+  "require": "tests-selenium/soporte/hooks.js",
+  "timeout": 60000,
+  "slow": 5000,
+  "reporter": "mochawesome",
+  "reporter-option": [
+    "reportDir=tests-selenium/reportes",
+    "reportFilename=reporte",
+    "reportTitle=MiniMarket - Pruebas automatizadas con Selenium",
+    "reportPageTitle=Reporte de pruebas Selenium",
+    "html=true",
+    "json=true",
+    "overwrite=true",
+    "charts=true",
+    "inlineAssets=true"
+  ]
+}
