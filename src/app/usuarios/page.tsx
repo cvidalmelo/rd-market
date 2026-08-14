@@ -45,9 +45,9 @@ export default async function UsuariosPage() {
             <tbody>
               {usuarios.map((usuario) => (
                 <tr key={usuario.id} className={fila}>
-                  <td className={`${celda} font-medium`}>{usuario.nombre}</td>
+                  <td className={`${celda} font-medium`}>{usuario.name}</td>
                   <td className={celda}>{usuario.email}</td>
-                  <td className={celda}>{formatoFecha.format(usuario.creadoEn)}</td>
+                  <td className={celda}>{formatoFecha.format(usuario.createdAt)}</td>
                   <td className={celda}>
                     <div className="flex items-center justify-end gap-3">
                       <Link

@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import MensajeError from "@/components/MensajeError";
 import { botonPrimario, campo, enlaceSecundario, etiqueta, titulo } from "@/components/ui";
 import { obtenerSesion } from "@/lib/dal";
-import { iniciarSesionAction } from "./actions";
+import { registrarseAction } from "./actions";
 
 type Props = { searchParams: Promise<{ error?: string }> };
 
-export default async function LoginPage({ searchParams }: Props) {
+export default async function RegistroPage({ searchParams }: Props) {
   const { error } = await searchParams;
 
   if (await obtenerSesion()) {
@@ -16,10 +16,17 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-sm">
-      <h1 className={`mb-6 ${titulo}`}>Iniciar sesion</h1>
+      <h1 className={`mb-6 ${titulo}`}>Crear cuenta</h1>
       <MensajeError mensaje={error} />
 
-      <form action={iniciarSesionAction} className="space-y-4">
+      <form action={registrarseAction} className="space-y-4">
+        <div>
+          <label className={etiqueta} htmlFor="nombre">
+            Nombre
+          </label>
+          <input id="nombre" name="nombre" type="text" required className={campo} />
+        </div>
+
         <div>
           <label className={etiqueta} htmlFor="email">
             Email
@@ -31,24 +38,26 @@ export default async function LoginPage({ searchParams }: Props) {
           <label className={etiqueta} htmlFor="password">
             Contrasena
           </label>
-          <input id="password" name="password" type="password" required className={campo} />
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            minLength={4}
+            className={campo}
+          />
         </div>
 
         <button type="submit" className={botonPrimario}>
-          Iniciar sesion
+          Crear cuenta
         </button>
       </form>
 
       <p className="mt-6 text-sm text-slate-600">
-        Todavia no tienes cuenta?{" "}
-        <Link href="/registro" className={enlaceSecundario}>
-          Crear cuenta
+        Las cuentas nuevas se crean con el rol de cliente.{" "}
+        <Link href="/login" className={enlaceSecundario}>
+          Ya tengo cuenta
         </Link>
-      </p>
-
-      <p className="mt-2 text-xs text-slate-500">
-        Usuarios de ejemplo: ana@minimarket.com / ana1234 (administradora) y
-        carlos@minimarket.com / carlos1234 (cliente)
       </p>
     </div>
   );

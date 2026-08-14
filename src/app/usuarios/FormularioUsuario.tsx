@@ -22,7 +22,7 @@ export default function FormularioUsuario({ action, usuario, textoBoton }: Props
           name="nombre"
           type="text"
           required
-          defaultValue={usuario?.nombre ?? ""}
+          defaultValue={usuario?.name ?? ""}
           className={campo}
         />
       </div>
@@ -48,11 +48,27 @@ export default function FormularioUsuario({ action, usuario, textoBoton }: Props
         <input
           id="password"
           name="password"
-          type="text"
-          required
-          defaultValue={usuario?.password ?? ""}
+          type="password"
+          required={!usuario}
+          minLength={4}
           className={campo}
         />
+        {usuario ? (
+          <p className="mt-1 text-xs text-slate-500">
+            Better Auth guarda la contrasena cifrada, por eso no se puede mostrar. Dejalo
+            vacio para conservar la actual.
+          </p>
+        ) : null}
+      </div>
+
+      <div>
+        <label className={etiqueta} htmlFor="rol">
+          Rol
+        </label>
+        <select id="rol" name="rol" defaultValue={usuario?.role ?? "user"} className={campo}>
+          <option value="user">Cliente</option>
+          <option value="admin">Administrador</option>
+        </select>
       </div>
 
       <div className="flex items-center gap-3">

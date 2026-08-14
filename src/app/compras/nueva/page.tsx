@@ -41,7 +41,7 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
             <select id="usuarioId" name="usuarioId" className={campo}>
               {usuarios.map((usuario) => (
                 <option key={usuario.id} value={usuario.id}>
-                  {usuario.nombre} ({usuario.email})
+                  {usuario.name} ({usuario.email})
                 </option>
               ))}
             </select>
