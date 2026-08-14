@@ -8,7 +8,9 @@ import {
   textoVacio,
   titulo,
 } from "@/components/ui";
+import { exigirUsuario } from "@/lib/dal";
 import { listarProductos } from "@/lib/productos";
+import { esAdmin } from "@/lib/roles";
 import { listarUsuarios } from "@/lib/usuarios";
 import { crearCompraAction } from "../actions";
 
@@ -18,7 +20,14 @@ type Props = { searchParams: Promise<{ error?: string }> };
 
 export default async function NuevaCompraPage({ searchParams }: Props) {
   const { error } = await searchParams;
-  const [usuarios, productos] = await Promise.all([listarUsuarios(), listarProductos()]);
+  const usuario = await exigirUsuario();
+  const administrador = esAdmin(usuario);
+
+  // Un cliente solo puede comprar a su nombre, asi que no se le ofrece la lista.
+  const [usuarios, productos] = await Promise.all([
+    administrador ? listarUsuarios() : Promise.resolve([]),
+    listarProductos(),
+  ]);
   const disponibles = productos.filter((producto) => producto.stock > 0);
 
   return (
@@ -27,10 +36,9 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
 
       <MensajeError mensaje={error} />
 
-      {usuarios.length === 0 || disponibles.length === 0 ? (
+      {disponibles.length === 0 ? (
         <p className={textoVacio}>
-          Para registrar una compra necesitas al menos un usuario y un producto con stock
-          disponible.
+          Para registrar una compra necesitas al menos un producto con stock disponible.
         </p>
       ) : (
         <form action={crearCompraAction} className="max-w-lg space-y-4">
@@ -38,13 +46,24 @@ export default async function NuevaCompraPage({ searchParams }: Props) {
             <label className={etiqueta} htmlFor="usuarioId">
               Usuario
             </label>
-            <select id="usuarioId" name="usuarioId" className={campo}>
-              {usuarios.map((usuario) => (
-                <option key={usuario.id} value={usuario.id}>
-                  {usuario.name} ({usuario.email})
-                </option>
-              ))}
-            </select>
+            {administrador ? (
+              <select id="usuarioId" name="usuarioId" className={campo}>
+                {usuarios.map((cliente) => (
+                  <option key={cliente.id} value={cliente.id}>
+                    {cliente.name} ({cliente.email})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id="usuarioId"
+                name="usuarioId"
+                type="text"
+                readOnly
+                value={`${usuario.name} (${usuario.email})`}
+                className={`${campo} bg-slate-100 text-slate-500`}
+              />
+            )}
           </div>
 
           <div>
