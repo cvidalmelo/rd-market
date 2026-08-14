@@ -50,7 +50,7 @@ export default async function ComprasPage() {
               {compras.map((compra) => (
                 <tr key={compra.id} className={fila}>
                   <td className={celda}>
-                    <span className="font-medium">{compra.usuario.nombre}</span>
+                    <span className="font-medium">{compra.usuario.name}</span>
                     <p className="text-xs text-slate-500">{compra.usuario.email}</p>
                   </td>
                   <td className={celda}>{compra.producto.nombre}</td>

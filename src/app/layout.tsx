@@ -24,7 +24,7 @@ export default async function RootLayout({
             <Link href="/" className="text-lg font-semibold">
               MiniMarket
             </Link>
-            <NavBar usuario={usuario} />
+            <NavBar usuario={usuario && { name: usuario.name, role: usuario.role }} />
           </div>
         </header>
 

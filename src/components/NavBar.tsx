@@ -4,15 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cerrarSesionAction } from "@/app/login/actions";
 import { botonPeligro } from "@/components/ui";
+import { esAdmin } from "@/lib/roles";
 
 const enlaces = [
-  { href: "/", texto: "Inicio" },
-  { href: "/productos", texto: "Productos" },
-  { href: "/usuarios", texto: "Usuarios" },
-  { href: "/compras", texto: "Compras" },
+  { href: "/", texto: "Inicio", soloAdmin: false },
+  { href: "/productos", texto: "Productos", soloAdmin: false },
+  { href: "/usuarios", texto: "Usuarios", soloAdmin: true },
+  { href: "/compras", texto: "Compras", soloAdmin: false },
 ];
 
-type Props = { usuario?: { nombre: string } | null };
+type Props = { usuario?: { name: string; role?: string | null } | null };
 
 export default function NavBar({ usuario }: Props) {
   const ruta = usePathname();
@@ -22,10 +23,13 @@ export default function NavBar({ usuario }: Props) {
     return null;
   }
 
+  const administrador = esAdmin(usuario);
+  const visibles = enlaces.filter((enlace) => !enlace.soloAdmin || administrador);
+
   return (
     <div className="flex flex-wrap items-center gap-4">
       <nav className="flex flex-wrap gap-1">
-        {enlaces.map((enlace) => {
+        {visibles.map((enlace) => {
           const activo =
             enlace.href === "/" ? ruta === "/" : ruta.startsWith(enlace.href);
 
@@ -46,7 +50,7 @@ export default function NavBar({ usuario }: Props) {
       </nav>
 
       <div className="flex items-center gap-3 text-sm">
-        <span className="text-slate-600">Hola, {usuario.nombre}</span>
+        <span className="text-slate-600">Hola, {usuario.name}</span>
         <form action={cerrarSesionAction}>
           <button type="submit" className={botonPeligro}>
             Cerrar sesion
