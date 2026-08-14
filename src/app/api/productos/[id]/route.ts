@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ErrorDeValidacion } from "@/lib/errores";
+import { exigirAdminApi, exigirSesionApi, responderError } from "@/lib/api-auth";
 import {
   actualizarProducto,
   eliminarProducto,
@@ -10,33 +10,44 @@ import {
 type Contexto = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, { params }: Contexto) {
-  const { id } = await params;
-  const producto = await obtenerProducto(id);
+  try {
+    await exigirSesionApi();
 
-  if (!producto) {
-    return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
+    const { id } = await params;
+    const producto = await obtenerProducto(id);
+
+    if (!producto) {
+      return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json(producto);
+  } catch (error) {
+    return responderError(error);
   }
-
-  return NextResponse.json(producto);
 }
 
 export async function PUT(request: Request, { params }: Contexto) {
-  const { id } = await params;
-  const cuerpo = (await request.json()) as Record<string, unknown>;
-
   try {
-    const producto = await actualizarProducto(id, normalizarProducto(cuerpo));
-    return NextResponse.json(producto);
+    await exigirAdminApi();
+
+    const { id } = await params;
+    const cuerpo = (await request.json()) as Record<string, unknown>;
+
+    return NextResponse.json(await actualizarProducto(id, normalizarProducto(cuerpo)));
   } catch (error) {
-    if (error instanceof ErrorDeValidacion) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    throw error;
+    return responderError(error);
   }
 }
 
 export async function DELETE(request: Request, { params }: Contexto) {
-  const { id } = await params;
-  await eliminarProducto(id);
-  return NextResponse.json({ ok: true });
+  try {
+    await exigirAdminApi();
+
+    const { id } = await params;
+    await eliminarProducto(id);
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return responderError(error);
+  }
 }
