@@ -1,10 +1,10 @@
-import { execFile } from "node:child_process";
+import { exec } from "node:child_process";
 import { promisify } from "node:util";
 import fs from "node:fs/promises";
 import { URL_BASE, abrirNavegador, cerrarNavegador, navegador } from "./navegador.js";
 import { DIR_CAPTURAS, capturar } from "./capturas.js";
 
-const ejecutar = promisify(execFile);
+const ejecutar = promisify(exec);
 
 async function comprobarQueLaAppResponde() {
   try {
@@ -29,7 +29,7 @@ export const mochaHooks = {
 
     await comprobarQueLaAppResponde();
     await fs.rm(DIR_CAPTURAS, { recursive: true, force: true });
-    await ejecutar("npm", ["run", "db:seed"]);
+    await ejecutar("npm run db:seed");
   },
 
   async beforeEach() {
