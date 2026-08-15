@@ -1,6 +1,7 @@
 import { By, until } from "selenium-webdriver";
 import { URL_BASE } from "../soporte/navegador.js";
 import { USUARIO } from "../soporte/datos.js";
+import { escribirCampo, pulsarHasta } from "../soporte/formulario.js";
 
 const CAMPO_EMAIL = By.id("email");
 const CAMPO_PASSWORD = By.id("password");
@@ -18,13 +19,8 @@ export default class PaginaLogin {
   }
 
   async rellenar(email, password) {
-    const campoEmail = await this.driver.findElement(CAMPO_EMAIL);
-    const campoPassword = await this.driver.findElement(CAMPO_PASSWORD);
-
-    await campoEmail.clear();
-    await campoEmail.sendKeys(email);
-    await campoPassword.clear();
-    await campoPassword.sendKeys(password);
+    await escribirCampo(this.driver, CAMPO_EMAIL, email);
+    await escribirCampo(this.driver, CAMPO_PASSWORD, password);
   }
 
   async enviar() {
@@ -39,9 +35,10 @@ export default class PaginaLogin {
   }
 
   /** Deja la sesion iniciada y espera a estar en la portada. */
-  async iniciarSesionValida() {
-    await this.iniciarSesion();
-    await this.driver.wait(until.urlIs(`${URL_BASE}/`), 15000);
+  async iniciarSesionValida(usuario = USUARIO) {
+    await this.abrir();
+    await this.rellenar(usuario.email, usuario.password);
+    await pulsarHasta(this.driver, BOTON_ENTRAR, until.urlIs(`${URL_BASE}/`));
   }
 
   async mensajeError() {

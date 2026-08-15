@@ -23,6 +23,16 @@ export async function abrirNavegador() {
   opciones.addArguments("--window-size=1440,900");
   opciones.addArguments("--lang=es");
 
+  // Sin gestor de contrasenas: si Chrome autocompleta el formulario de login
+  // pisa lo que escribe la prueba y el caso falla por un motivo que no es suyo.
+  opciones.addArguments("--disable-save-password-bubble");
+  opciones.setUserPreferences({
+    "credentials_enable_service": false,
+    "profile.password_manager_enabled": false,
+    "profile.password_manager_leak_detection": false,
+    "autofill.profile_enabled": false,
+  });
+
   if (process.env.HEADLESS === "1") {
     opciones.addArguments("--headless=new");
   }

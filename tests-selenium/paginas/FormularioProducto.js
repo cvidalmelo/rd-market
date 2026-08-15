@@ -1,4 +1,5 @@
 import { By, until } from "selenium-webdriver";
+import { escribirCampo } from "../soporte/formulario.js";
 
 const MENSAJE_ERROR = By.css("p.bg-red-50");
 
@@ -17,12 +18,7 @@ export default class FormularioProducto {
   }
 
   async escribir(campo, valor) {
-    const elemento = await this.driver.findElement(CAMPOS[campo]);
-    await elemento.clear();
-
-    if (valor !== "") {
-      await elemento.sendKeys(valor);
-    }
+    await escribirCampo(this.driver, CAMPOS[campo], valor);
   }
 
   async valorDe(campo) {
