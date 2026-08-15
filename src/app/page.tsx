@@ -1,15 +1,24 @@
 import Link from "next/link";
+import MensajeError from "@/components/MensajeError";
 import { contarCompras } from "@/lib/compras";
+import { exigirUsuario } from "@/lib/dal";
 import { contarProductos } from "@/lib/productos";
+import { esAdmin } from "@/lib/roles";
 import { contarUsuarios } from "@/lib/usuarios";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home() {
+type Props = { searchParams: Promise<{ error?: string }> };
+
+export default async function Home({ searchParams }: Props) {
+  const { error } = await searchParams;
+  const usuario = await exigirUsuario();
+  const administrador = esAdmin(usuario);
+
   const [productos, usuarios, compras] = await Promise.all([
     contarProductos(),
-    contarUsuarios(),
-    contarCompras(),
+    administrador ? contarUsuarios() : Promise.resolve(0),
+    contarCompras(usuario),
   ]);
 
   const secciones = [
@@ -17,21 +26,28 @@ export default async function Home() {
       href: "/productos",
       titulo: "Productos",
       total: productos,
-      detalle: "Alta, edicion y baja del catalogo",
+      detalle: administrador
+        ? "Alta, edicion y baja del catalogo"
+        : "Catalogo disponible en la tienda",
+      visible: true,
     },
     {
       href: "/usuarios",
       titulo: "Usuarios",
       total: usuarios,
-      detalle: "Registro y administracion de clientes",
+      detalle: "Registro, roles y bloqueo de cuentas",
+      visible: administrador,
     },
     {
       href: "/compras",
-      titulo: "Compras",
+      titulo: administrador ? "Compras" : "Mis compras",
       total: compras,
-      detalle: "Productos adquiridos por cada usuario",
+      detalle: administrador
+        ? "Productos adquiridos por cada usuario"
+        : "Productos que has adquirido",
+      visible: true,
     },
-  ];
+  ].filter((seccion) => seccion.visible);
 
   return (
     <div>
@@ -41,10 +57,19 @@ export default async function Home() {
       <h1 className="mt-2 text-2xl font-semibold">MiniMarket</h1>
       <p className="mt-3 max-w-prose text-sm text-slate-600">
         Aplicacion CRUD de productos, usuarios y compras construida con Next.js, Prisma y
-        SQLite.
+        SQLite, con autenticacion y roles gestionados por Better Auth.
       </p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <p className="mt-2 text-sm text-slate-600">
+        Sesion iniciada como <span className="font-medium">{usuario.name}</span> con el rol
+        de {administrador ? "administrador" : "cliente"}.
+      </p>
+
+      <div className="mt-6">
+        <MensajeError mensaje={error} />
+      </div>
+
+      <div className="mt-2 grid gap-4 sm:grid-cols-3">
         {secciones.map((seccion) => (
           <Link
             key={seccion.href}

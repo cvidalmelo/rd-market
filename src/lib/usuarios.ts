@@ -1,5 +1,11 @@
-import prisma from "./prisma";
+import "server-only";
+import { headers } from "next/headers";
+import { APIError } from "better-auth/api";
+import { auth } from "./auth";
 import { ErrorDeValidacion } from "./errores";
+import prisma from "./prisma";
+import { type Rol, normalizarRol } from "./roles";
+import { mensajeDeAlta } from "./sesion";
 
 const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -7,6 +13,7 @@ export type DatosUsuario = {
   nombre: string;
   email: string;
   password: string;
+  rol: Rol;
 };
 
 export type Usuario = Awaited<ReturnType<typeof listarUsuarios>>[number];
@@ -18,17 +25,22 @@ function texto(valor: unknown) {
 /** Convierte los datos de un formulario o de una peticion JSON al formato del modelo. */
 export function normalizarUsuario(entrada: Record<string, unknown>): DatosUsuario {
   return {
-    nombre: texto(entrada.nombre),
+    nombre: texto(entrada.nombre) || texto(entrada.name),
     email: texto(entrada.email).toLowerCase(),
     password: texto(entrada.password),
+    rol: normalizarRol(texto(entrada.rol) || texto(entrada.role)),
   };
 }
 
 /**
- * Reglas de negocio comunes a la creacion y a la edicion de un usuario.
- * `idActual` evita que un usuario choque consigo mismo al editarse.
+ * Reglas comunes a cualquier alta de cuenta (registro publico o creacion desde
+ * la administracion). La unicidad del email la comprueba Better Auth.
  */
-export async function validarUsuario(datos: DatosUsuario, idActual?: string) {
+export function validarDatosDeCuenta(datos: {
+  nombre: string;
+  email: string;
+  password: string;
+}) {
   if (!datos.nombre) {
     throw new ErrorDeValidacion("El nombre del usuario es obligatorio.");
   }
@@ -40,36 +52,130 @@ export async function validarUsuario(datos: DatosUsuario, idActual?: string) {
   if (datos.password.length < 4) {
     throw new ErrorDeValidacion("La contrasena debe tener al menos 4 caracteres.");
   }
+}
 
-  const existente = await prisma.usuario.findUnique({ where: { email: datos.email } });
+/** Igual que la anterior, pero la contrasena es opcional al editar. */
+export function validarEdicionDeCuenta(datos: DatosUsuario) {
+  if (!datos.nombre) {
+    throw new ErrorDeValidacion("El nombre del usuario es obligatorio.");
+  }
 
-  if (existente && existente.id !== idActual) {
-    throw new ErrorDeValidacion("Ya existe un usuario registrado con ese email.");
+  if (!FORMATO_EMAIL.test(datos.email)) {
+    throw new ErrorDeValidacion("El email no tiene un formato valido.");
+  }
+
+  if (datos.password && datos.password.length < 4) {
+    throw new ErrorDeValidacion("La contrasena debe tener al menos 4 caracteres.");
+  }
+}
+
+/** Traduce los errores del plugin admin a mensajes propios de la aplicacion. */
+async function conErroresDeAdmin<T>(operacion: () => Promise<T>) {
+  try {
+    return await operacion();
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw new ErrorDeValidacion(mensajeDeAlta(error));
+    }
+
+    throw error;
   }
 }
 
 export function listarUsuarios() {
-  return prisma.usuario.findMany({ orderBy: { creadoEn: "desc" } });
+  return prisma.user.findMany({ orderBy: { createdAt: "desc" } });
 }
 
 export function contarUsuarios() {
-  return prisma.usuario.count();
+  return prisma.user.count();
 }
 
 export function obtenerUsuario(id: string) {
-  return prisma.usuario.findUnique({ where: { id } });
+  return prisma.user.findUnique({ where: { id } });
 }
 
+/** Alta desde la administracion: Better Auth hashea la contrasena y crea la cuenta. */
 export async function crearUsuario(datos: DatosUsuario) {
-  await validarUsuario(datos);
-  return prisma.usuario.create({ data: datos });
+  validarDatosDeCuenta(datos);
+
+  const cabeceras = await headers();
+
+  return conErroresDeAdmin(() =>
+    auth.api.createUser({
+      body: {
+        name: datos.nombre,
+        email: datos.email,
+        password: datos.password,
+        role: datos.rol,
+      },
+      headers: cabeceras,
+    }),
+  );
 }
 
+/** Edicion desde la administracion. La contrasena solo se cambia si viene rellena. */
 export async function actualizarUsuario(id: string, datos: DatosUsuario) {
-  await validarUsuario(datos, id);
-  return prisma.usuario.update({ where: { id }, data: datos });
+  validarEdicionDeCuenta(datos);
+
+  const cabeceras = await headers();
+
+  await conErroresDeAdmin(async () => {
+    await auth.api.adminUpdateUser({
+      body: { userId: id, data: { name: datos.nombre, email: datos.email } },
+      headers: cabeceras,
+    });
+
+    await auth.api.setRole({
+      body: { userId: id, role: datos.rol },
+      headers: cabeceras,
+    });
+
+    if (datos.password) {
+      await auth.api.setUserPassword({
+        body: { userId: id, newPassword: datos.password },
+        headers: cabeceras,
+      });
+    }
+  });
+
+  return obtenerUsuario(id);
 }
 
-export function eliminarUsuario(id: string) {
-  return prisma.usuario.delete({ where: { id } });
+export async function cambiarRol(id: string, rol: unknown) {
+  const cabeceras = await headers();
+
+  return conErroresDeAdmin(() =>
+    auth.api.setRole({
+      body: { userId: id, role: normalizarRol(rol) },
+      headers: cabeceras,
+    }),
+  );
+}
+
+/** Bloquea la cuenta y revoca sus sesiones abiertas. */
+export async function banearUsuario(id: string, motivo?: string) {
+  const cabeceras = await headers();
+
+  return conErroresDeAdmin(() =>
+    auth.api.banUser({
+      body: { userId: id, banReason: motivo || "Bloqueado por la administracion" },
+      headers: cabeceras,
+    }),
+  );
+}
+
+export async function desbanearUsuario(id: string) {
+  const cabeceras = await headers();
+
+  return conErroresDeAdmin(() =>
+    auth.api.unbanUser({ body: { userId: id }, headers: cabeceras }),
+  );
+}
+
+export async function eliminarUsuario(id: string) {
+  const cabeceras = await headers();
+
+  return conErroresDeAdmin(() =>
+    auth.api.removeUser({ body: { userId: id }, headers: cabeceras }),
+  );
 }

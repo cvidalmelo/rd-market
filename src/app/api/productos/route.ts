@@ -1,22 +1,26 @@
 import { NextResponse } from "next/server";
-import { ErrorDeValidacion } from "@/lib/errores";
+import { exigirAdminApi, exigirSesionApi, responderError } from "@/lib/api-auth";
 import { crearProducto, listarProductos, normalizarProducto } from "@/lib/productos";
 
 export async function GET() {
-  const productos = await listarProductos();
-  return NextResponse.json(productos);
+  try {
+    await exigirSesionApi();
+
+    return NextResponse.json(await listarProductos());
+  } catch (error) {
+    return responderError(error);
+  }
 }
 
 export async function POST(request: Request) {
-  const cuerpo = (await request.json()) as Record<string, unknown>;
-
   try {
+    await exigirAdminApi();
+
+    const cuerpo = (await request.json()) as Record<string, unknown>;
     const producto = await crearProducto(normalizarProducto(cuerpo));
+
     return NextResponse.json(producto, { status: 201 });
   } catch (error) {
-    if (error instanceof ErrorDeValidacion) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    throw error;
+    return responderError(error);
   }
 }

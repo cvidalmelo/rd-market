@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import MensajeError from "@/components/MensajeError";
 import { titulo } from "@/components/ui";
+import { exigirAdmin } from "@/lib/dal";
 import { obtenerProducto } from "@/lib/productos";
 import FormularioProducto from "../../FormularioProducto";
 import { actualizarProductoAction } from "../../actions";
@@ -13,6 +14,7 @@ type Props = {
 export default async function EditarProductoPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { error } = await searchParams;
+  await exigirAdmin();
   const producto = await obtenerProducto(id);
 
   if (!producto) {
