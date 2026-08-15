@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ErrorDeValidacion } from "@/lib/errores";
+import { exigirAdminApi, responderError } from "@/lib/api-auth";
 import {
   actualizarUsuario,
   eliminarUsuario,
@@ -10,33 +10,44 @@ import {
 type Contexto = { params: Promise<{ id: string }> };
 
 export async function GET(request: Request, { params }: Contexto) {
-  const { id } = await params;
-  const usuario = await obtenerUsuario(id);
+  try {
+    await exigirAdminApi();
 
-  if (!usuario) {
-    return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+    const { id } = await params;
+    const usuario = await obtenerUsuario(id);
+
+    if (!usuario) {
+      return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json(usuario);
+  } catch (error) {
+    return responderError(error);
   }
-
-  return NextResponse.json(usuario);
 }
 
 export async function PUT(request: Request, { params }: Contexto) {
-  const { id } = await params;
-  const cuerpo = (await request.json()) as Record<string, unknown>;
-
   try {
-    const usuario = await actualizarUsuario(id, normalizarUsuario(cuerpo));
-    return NextResponse.json(usuario);
+    await exigirAdminApi();
+
+    const { id } = await params;
+    const cuerpo = (await request.json()) as Record<string, unknown>;
+
+    return NextResponse.json(await actualizarUsuario(id, normalizarUsuario(cuerpo)));
   } catch (error) {
-    if (error instanceof ErrorDeValidacion) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    throw error;
+    return responderError(error);
   }
 }
 
 export async function DELETE(request: Request, { params }: Contexto) {
-  const { id } = await params;
-  await eliminarUsuario(id);
-  return NextResponse.json({ ok: true });
+  try {
+    await exigirAdminApi();
+
+    const { id } = await params;
+    await eliminarUsuario(id);
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return responderError(error);
+  }
 }

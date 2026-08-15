@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
+import { exigirSesionApi, responderError } from "@/lib/api-auth";
 import { eliminarCompra } from "@/lib/compras";
-import { ErrorDeValidacion } from "@/lib/errores";
 
 type Contexto = { params: Promise<{ id: string }> };
 
 export async function DELETE(request: Request, { params }: Contexto) {
-  const { id } = await params;
-
   try {
-    await eliminarCompra(id);
+    const { user } = await exigirSesionApi();
+
+    const { id } = await params;
+    await eliminarCompra(id, user);
+
     return NextResponse.json({ ok: true });
   } catch (error) {
-    if (error instanceof ErrorDeValidacion) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-    throw error;
+    return responderError(error, 404);
   }
 }
