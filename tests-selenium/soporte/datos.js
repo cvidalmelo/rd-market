@@ -27,6 +27,11 @@ export function nombreUnico(prefijo) {
   return `${prefijo} ${Date.now()}`;
 }
 
+/** Email unico, para las altas de cuenta que dejan rastro en la base de datos. */
+export function correoUnico(prefijo) {
+  return `${prefijo}.${Date.now()}@minimarket.com`;
+}
+
 /**
  * Inicia sesion contra Better Auth y devuelve la cookie lista para reenviar en
  * la cabecera `Cookie`. La API esta protegida, asi que cualquier preparativo por
